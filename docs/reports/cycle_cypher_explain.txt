@@ -1,0 +1,63 @@
+LOAD
+SET
+                                                                                                                                                                                                                                                            QUERY PLAN
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Subquery Scan on _  (cost=130.03..130.05 rows=1 width=256) (actual time=6.692..6.695 rows=9.00 loops=1)
+   Buffers: shared hit=8857
+   ->  Sort  (cost=130.03..130.04 rows=1 width=288) (actual time=6.691..6.693 rows=9.00 loops=1)
+         Sort Key: (agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(t1.id, t1.start_id, t1.end_id, _label_name('25475'::oid, t1.id), t1.properties), '"tx_epoch"'::agtype]))
+         Sort Method: quicksort  Memory: 26kB
+         Buffers: shared hit=8857
+         ->  Nested Loop  (cost=18.15..130.02 rows=1 width=288) (actual time=0.888..6.674 rows=9.00 loops=1)
+               Join Filter: ((agtype_access_operator(VARIADIC ARRAY[a.properties, '"account_id"'::agtype]) < agtype_access_operator(VARIADIC ARRAY[c.properties, '"account_id"'::agtype])) AND (agtype_access_operator(VARIADIC ARRAY[c.properties, '"account_id"'::agtype]) <> agtype_access_operator(VARIADIC ARRAY[a.properties, '"account_id"'::agtype])) AND (agtype_access_operator(VARIADIC ARRAY[b.properties, '"account_id"'::agtype]) <> agtype_access_operator(VARIADIC ARRAY[c.properties, '"account_id"'::agtype])))
+               Buffers: shared hit=8849
+               ->  Nested Loop  (cost=18.00..126.20 rows=1 width=1017) (actual time=0.824..6.522 rows=9.00 loops=1)
+                     Join Filter: (_ag_enforce_edge_uniqueness3(t1.id, t2.id, t3.id) AND (t1.end_id = t2.start_id) AND (t2.end_id = t3.start_id) AND (agtype_access_operator(VARIADIC ARRAY[t1.properties, '"tx_time"'::agtype]) <= agtype_access_operator(VARIADIC ARRAY[t2.properties, '"tx_time"'::agtype])) AND (agtype_access_operator(VARIADIC ARRAY[t2.properties, '"tx_time"'::agtype]) <= agtype_access_operator(VARIADIC ARRAY[t3.properties, '"tx_time"'::agtype])))
+                     Rows Removed by Join Filter: 834
+                     Buffers: shared hit=8792
+                     ->  Nested Loop  (cost=17.73..124.92 rows=1 width=780) (actual time=0.107..5.141 rows=357.00 loops=1)
+                           Join Filter: ((agtype_access_operator(VARIADIC ARRAY[a.properties, '"account_id"'::agtype]) < agtype_access_operator(VARIADIC ARRAY[b.properties, '"account_id"'::agtype])) AND (agtype_access_operator(VARIADIC ARRAY[a.properties, '"account_id"'::agtype]) <> agtype_access_operator(VARIADIC ARRAY[b.properties, '"account_id"'::agtype])))
+                           Rows Removed by Join Filter: 621
+                           Buffers: shared hit=6325
+                           ->  Nested Loop  (cost=17.58..121.18 rows=1 width=627) (actual time=0.079..3.805 rows=978.00 loops=1)
+                                 Join Filter: ((agtype_access_operator(VARIADIC ARRAY[t3.properties, '"tx_epoch"'::agtype]) - agtype_access_operator(VARIADIC ARRAY[t1.properties, '"tx_epoch"'::agtype])) <= '21600'::agtype)
+                                 Rows Removed by Join Filter: 585
+                                 Buffers: shared hit=4369
+                                 ->  Hash Join  (cost=17.30..109.77 rows=9 width=390) (actual time=0.068..0.707 rows=792.00 loops=1)
+                                       Hash Cond: (t3.end_id = a.id)
+                                       Buffers: shared hit=73
+                                       ->  Seq Scan on "TRANSFER" t3  (cost=0.00..92.44 rows=9 width=237) (actual time=0.009..0.560 rows=792.00 loops=1)
+                                             Filter: (agtype_access_operator(VARIADIC ARRAY[properties, '"tx_type"'::agtype]) = '"transfer"'::agtype)
+                                             Rows Removed by Filter: 1104
+                                             Buffers: shared hit=64
+                                       ->  Hash  (cost=12.69..12.69 rows=369 width=153) (actual time=0.055..0.055 rows=369.00 loops=1)
+                                             Buckets: 1024  Batches: 1  Memory Usage: 75kB
+                                             Buffers: shared hit=9
+                                             ->  Seq Scan on "Account" a  (cost=0.00..12.69 rows=369 width=153) (actual time=0.003..0.026 rows=369.00 loops=1)
+                                                   Buffers: shared hit=9
+                                 ->  Index Scan using "TRANSFER_start_id_idx" on "TRANSFER" t1  (cost=0.28..1.25 rows=1 width=237) (actual time=0.001..0.003 rows=1.97 loops=792)
+                                       Index Cond: (start_id = a.id)
+                                       Filter: (agtype_access_operator(VARIADIC ARRAY[properties, '"tx_type"'::agtype]) = '"transfer"'::agtype)
+                                       Rows Removed by Filter: 4
+                                       Index Searches: 792
+                                       Buffers: shared hit=4296
+                           ->  Index Scan using "Account_pkey" on "Account" b  (cost=0.15..3.72 rows=1 width=153) (actual time=0.000..0.000 rows=1.00 loops=978)
+                                 Index Cond: (id = t1.end_id)
+                                 Index Searches: 978
+                                 Buffers: shared hit=1956
+                     ->  Index Scan using "TRANSFER_start_id_idx" on "TRANSFER" t2  (cost=0.28..1.25 rows=1 width=237) (actual time=0.001..0.004 rows=2.36 loops=357)
+                           Index Cond: (start_id = b.id)
+                           Filter: (agtype_access_operator(VARIADIC ARRAY[properties, '"tx_type"'::agtype]) = '"transfer"'::agtype)
+                           Rows Removed by Filter: 5
+                           Index Searches: 357
+                           Buffers: shared hit=2467
+               ->  Index Scan using "Account_pkey" on "Account" c  (cost=0.15..3.72 rows=1 width=153) (actual time=0.001..0.001 rows=1.00 loops=9)
+                     Index Cond: (id = t2.end_id)
+                     Index Searches: 9
+                     Buffers: shared hit=18
+ Planning:
+   Buffers: shared hit=352
+ Planning Time: 1.862 ms
+ Execution Time: 6.789 ms
+(57 rows)
+

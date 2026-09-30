@@ -1,0 +1,146 @@
+LOAD
+SET
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        QUERY PLAN                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=134.41..134.42 rows=1 width=212) (actual time=5.569..5.575 rows=9.00 loops=1)
+   Output: ((dc.deposit_day)::date), dc.beneficiary_account_id, beneficiary_customer.full_name, dc.small_cash_deposit_count, dc.structured_total, dc.first_deposit_at, dc.last_deposit_at, ((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx.id, tx.start_id, tx.end_id, _label_name('17080'::oid, tx.id), tx.properties), '"tx_id"'::agtype]))::text), (((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx.id, tx.start_id, tx.end_id, _label_name('17080'::oid, tx.id), tx.properties), '"amount"'::agtype]))::text)::numeric(14,2)), (((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx.id, tx.start_id, tx.end_id, _label_name('17080'::oid, tx.id), tx.properties), '"tx_time"'::agtype]))::text)::timestamp without time zone), ((agtype_access_operator(VARIADIC ARRAY[_agtype_build_vertex(dst.id, _label_name('17080'::oid, dst.id), dst.properties), '"account_id"'::agtype]))::text), shell_customer.full_name
+   Sort Key: dc.structured_total DESC, (((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx.id, tx.start_id, tx.end_id, _label_name('17080'::oid, tx.id), tx.properties), '"tx_time"'::agtype]))::text)::timestamp without time zone)
+   Sort Method: quicksort  Memory: 26kB
+   Buffers: shared hit=689
+   CTE params
+     ->  Result  (cost=0.00..0.01 rows=1 width=84) (actual time=0.001..0.002 rows=1.00 loops=1)
+           Output: 10000.00, 5, 45000.00, '24:00:00'::interval
+   ->  Nested Loop  (cost=112.13..134.39 rows=1 width=212) (actual time=4.979..5.550 rows=9.00 loops=1)
+         Output: (dc.deposit_day)::date, dc.beneficiary_account_id, beneficiary_customer.full_name, dc.small_cash_deposit_count, dc.structured_total, dc.first_deposit_at, dc.last_deposit_at, (agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx.id, tx.start_id, tx.end_id, _label_name('17080'::oid, tx.id), tx.properties), '"tx_id"'::agtype]))::text, ((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx.id, tx.start_id, tx.end_id, _label_name('17080'::oid, tx.id), tx.properties), '"amount"'::agtype]))::text)::numeric(14,2), ((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx.id, tx.start_id, tx.end_id, _label_name('17080'::oid, tx.id), tx.properties), '"tx_time"'::agtype]))::text)::timestamp without time zone, (agtype_access_operator(VARIADIC ARRAY[_agtype_build_vertex(dst.id, _label_name('17080'::oid, dst.id), dst.properties), '"account_id"'::agtype]))::text, shell_customer.full_name
+         Inner Unique: true
+         Buffers: shared hit=683
+         ->  Nested Loop  (cost=111.86..133.96 rows=1 width=487) (actual time=4.953..5.475 rows=9.00 loops=1)
+               Output: dc.deposit_day, dc.beneficiary_account_id, dc.small_cash_deposit_count, dc.structured_total, dc.first_deposit_at, dc.last_deposit_at, tx.id, tx.start_id, tx.end_id, tx.properties, dst.id, dst.properties, beneficiary_customer.full_name, shell_account.customer_id
+               Inner Unique: true
+               Buffers: shared hit=656
+               ->  Nested Loop  (cost=111.58..133.55 rows=1 width=471) (actual time=4.940..5.440 rows=9.00 loops=1)
+                     Output: dc.deposit_day, dc.beneficiary_account_id, dc.small_cash_deposit_count, dc.structured_total, dc.first_deposit_at, dc.last_deposit_at, tx.id, tx.start_id, tx.end_id, tx.properties, dst.id, dst.properties, beneficiary_customer.full_name
+                     Inner Unique: true
+                     Buffers: shared hit=629
+                     ->  Nested Loop  (cost=111.31..133.17 rows=1 width=472) (actual time=4.929..5.411 rows=9.00 loops=1)
+                           Output: dc.deposit_day, dc.beneficiary_account_id, dc.small_cash_deposit_count, dc.structured_total, dc.first_deposit_at, dc.last_deposit_at, tx.id, tx.start_id, tx.end_id, tx.properties, dst.id, dst.properties, beneficiary_account.customer_id
+                           Inner Unique: true
+                           Join Filter: (beneficiary_account.account_id = dc.beneficiary_account_id)
+                           Buffers: shared hit=602
+                           ->  Nested Loop  (cost=111.02..132.75 rows=1 width=609) (actual time=4.918..5.375 rows=9.00 loops=1)
+                                 Output: dc.deposit_day, dc.beneficiary_account_id, dc.small_cash_deposit_count, dc.structured_total, dc.first_deposit_at, dc.last_deposit_at, src.id, src.properties, tx.id, tx.start_id, tx.end_id, tx.properties, dst.id, dst.properties
+                                 Inner Unique: true
+                                 Buffers: shared hit=575
+                                 ->  Nested Loop  (cost=110.88..129.01 rows=1 width=456) (actual time=4.905..5.354 rows=9.00 loops=1)
+                                       Output: dc.deposit_day, dc.beneficiary_account_id, dc.small_cash_deposit_count, dc.structured_total, dc.first_deposit_at, dc.last_deposit_at, src.id, src.properties, tx.id, tx.start_id, tx.end_id, tx.properties
+                                       Join Filter: (((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx.id, tx.start_id, tx.end_id, _label_name('17080'::oid, tx.id), tx.properties), '"tx_time"'::agtype]))::text)::timestamp without time zone <= (dc.last_deposit_at + p.funnel_window))
+                                       Buffers: shared hit=557
+                                       ->  Nested Loop  (cost=110.88..128.96 rows=1 width=456) (actual time=4.901..5.338 rows=9.00 loops=1)
+                                             Output: dc.deposit_day, dc.beneficiary_account_id, dc.small_cash_deposit_count, dc.structured_total, dc.first_deposit_at, dc.last_deposit_at, src.id, src.properties, tx.id, tx.start_id, tx.end_id, tx.properties
+                                             Join Filter: ((((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx.id, tx.start_id, tx.end_id, _label_name('17080'::oid, tx.id), tx.properties), '"tx_time"'::agtype]))::text)::timestamp without time zone >= dc.last_deposit_at) AND (((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx.id, tx.start_id, tx.end_id, _label_name('17080'::oid, tx.id), tx.properties), '"amount"'::agtype]))::text)::numeric(14,2) >= (dc.structured_total * 0.70)))
+                                             Rows Removed by Join Filter: 9
+                                             Buffers: shared hit=557
+                                             ->  Hash Join  (cost=110.60..126.54 rows=2 width=249) (actual time=4.886..5.229 rows=9.00 loops=1)
+                                                   Output: dc.deposit_day, dc.beneficiary_account_id, dc.small_cash_deposit_count, dc.structured_total, dc.first_deposit_at, dc.last_deposit_at, src.id, src.properties
+                                                   Hash Cond: ((agtype_access_operator(VARIADIC ARRAY[_agtype_build_vertex(src.id, _label_name('17080'::oid, src.id), src.properties), '"account_id"'::agtype]))::text = dc.beneficiary_account_id)
+                                                   Buffers: shared hit=527
+                                                   ->  Seq Scan on aml_graph."Account" src  (cost=0.00..12.69 rows=369 width=153) (actual time=0.006..0.026 rows=369.00 loops=1)
+                                                         Output: src.id, src.properties
+                                                         Buffers: shared hit=9
+                                                   ->  Hash  (cost=110.59..110.59 rows=1 width=96) (actual time=4.865..4.868 rows=9.00 loops=1)
+                                                         Output: dc.deposit_day, dc.beneficiary_account_id, dc.small_cash_deposit_count, dc.structured_total, dc.first_deposit_at, dc.last_deposit_at
+                                                         Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                                         Buffers: shared hit=518
+                                                         ->  Subquery Scan on dc  (cost=110.46..110.59 rows=1 width=96) (actual time=4.485..4.859 rows=9.00 loops=1)
+                                                               Output: dc.deposit_day, dc.beneficiary_account_id, dc.small_cash_deposit_count, dc.structured_total, dc.first_deposit_at, dc.last_deposit_at
+                                                               Buffers: shared hit=518
+                                                               ->  GroupAggregate  (cost=110.46..110.58 rows=1 width=96) (actual time=4.484..4.857 rows=9.00 loops=1)
+                                                                     Output: ((agtype_access_operator(VARIADIC ARRAY[_agtype_build_vertex(dst_1.id, _label_name('17080'::oid, dst_1.id), dst_1.properties), '"account_id"'::agtype]))::text), (date_trunc('day'::text, ((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx_1.id, tx_1.start_id, tx_1.end_id, _label_name('17080'::oid, tx_1.id), tx_1.properties), '"tx_time"'::agtype]))::text)::timestamp without time zone)), count(*), sum(((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx_1.id, tx_1.start_id, tx_1.end_id, _label_name('17080'::oid, tx_1.id), tx_1.properties), '"amount"'::agtype]))::text)::numeric(14,2)), min(((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx_1.id, tx_1.start_id, tx_1.end_id, _label_name('17080'::oid, tx_1.id), tx_1.properties), '"tx_time"'::agtype]))::text)::timestamp without time zone), max(((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx_1.id, tx_1.start_id, tx_1.end_id, _label_name('17080'::oid, tx_1.id), tx_1.properties), '"tx_time"'::agtype]))::text)::timestamp without time zone)
+                                                                     Group Key: ((agtype_access_operator(VARIADIC ARRAY[_agtype_build_vertex(dst_1.id, _label_name('17080'::oid, dst_1.id), dst_1.properties), '"account_id"'::agtype]))::text), (date_trunc('day'::text, ((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx_1.id, tx_1.start_id, tx_1.end_id, _label_name('17080'::oid, tx_1.id), tx_1.properties), '"tx_time"'::agtype]))::text)::timestamp without time zone))
+                                                                     Filter: ((count(*) >= (InitPlan 2).col1) AND (sum(((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx_1.id, tx_1.start_id, tx_1.end_id, _label_name('17080'::oid, tx_1.id), tx_1.properties), '"amount"'::agtype]))::text)::numeric(14,2)) >= (InitPlan 3).col1))
+                                                                     Rows Removed by Filter: 51
+                                                                     Buffers: shared hit=518
+                                                                     InitPlan 2
+                                                                       ->  CTE Scan on params  (cost=0.00..0.02 rows=1 width=4) (actual time=0.001..0.001 rows=1.00 loops=1)
+                                                                             Output: params.min_small_deposits
+                                                                             Storage: Memory  Maximum Storage: 17kB
+                                                                     InitPlan 3
+                                                                       ->  CTE Scan on params params_1  (cost=0.00..0.02 rows=1 width=32) (actual time=0.000..0.001 rows=1.00 loops=1)
+                                                                             Output: params_1.min_structured_total
+                                                                             Storage: Memory  Maximum Storage: 17kB
+                                                                     ->  Sort  (cost=110.42..110.43 rows=1 width=247) (actual time=4.448..4.454 rows=105.00 loops=1)
+                                                                           Output: ((agtype_access_operator(VARIADIC ARRAY[_agtype_build_vertex(dst_1.id, _label_name('17080'::oid, dst_1.id), dst_1.properties), '"account_id"'::agtype]))::text), (date_trunc('day'::text, ((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx_1.id, tx_1.start_id, tx_1.end_id, _label_name('17080'::oid, tx_1.id), tx_1.properties), '"tx_time"'::agtype]))::text)::timestamp without time zone)), tx_1.id, tx_1.start_id, tx_1.end_id, tx_1.properties
+                                                                           Sort Key: ((agtype_access_operator(VARIADIC ARRAY[_agtype_build_vertex(dst_1.id, _label_name('17080'::oid, dst_1.id), dst_1.properties), '"account_id"'::agtype]))::text), (date_trunc('day'::text, ((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx_1.id, tx_1.start_id, tx_1.end_id, _label_name('17080'::oid, tx_1.id), tx_1.properties), '"tx_time"'::agtype]))::text)::timestamp without time zone))
+                                                                           Sort Method: quicksort  Memory: 52kB
+                                                                           Buffers: shared hit=518
+                                                                           ->  Nested Loop  (cost=0.29..110.41 rows=1 width=247) (actual time=0.450..4.349 rows=105.00 loops=1)
+                                                                                 Output: (agtype_access_operator(VARIADIC ARRAY[_agtype_build_vertex(dst_1.id, _label_name('17080'::oid, dst_1.id), dst_1.properties), '"account_id"'::agtype]))::text, date_trunc('day'::text, ((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx_1.id, tx_1.start_id, tx_1.end_id, _label_name('17080'::oid, tx_1.id), tx_1.properties), '"tx_time"'::agtype]))::text)::timestamp without time zone), tx_1.id, tx_1.start_id, tx_1.end_id, tx_1.properties
+                                                                                 Join Filter: (((agtype_access_operator(VARIADIC ARRAY[_agtype_build_edge(tx_1.id, tx_1.start_id, tx_1.end_id, _label_name('17080'::oid, tx_1.id), tx_1.properties), '"amount"'::agtype]))::text)::numeric(14,2) < p_1.reporting_threshold)
+                                                                                 Buffers: shared hit=515
+                                                                                 ->  Nested Loop  (cost=0.29..110.34 rows=1 width=360) (actual time=0.037..3.097 rows=105.00 loops=1)
+                                                                                       Output: tx_1.id, tx_1.start_id, tx_1.end_id, tx_1.properties, dst_1.id, dst_1.properties
+                                                                                       Inner Unique: true
+                                                                                       Buffers: shared hit=476
+                                                                                       ->  Nested Loop  (cost=0.15..102.13 rows=1 width=207) (actual time=0.034..2.982 rows=105.00 loops=1)
+                                                                                             Output: tx_1.id, tx_1.start_id, tx_1.end_id, tx_1.properties
+                                                                                             Inner Unique: true
+                                                                                             Buffers: shared hit=266
+                                                                                             ->  Seq Scan on aml_graph."TRANSFER" tx_1  (cost=0.00..93.92 rows=1 width=207) (actual time=0.026..2.555 rows=105.00 loops=1)
+                                                                                                   Output: tx_1.id, tx_1.start_id, tx_1.end_id, tx_1.properties
+                                                                                                   Filter: ((agtype_access_operator(VARIADIC ARRAY[tx_1.properties, '"tx_type"'::agtype]) = '"deposit"'::agtype) AND (agtype_access_operator(VARIADIC ARRAY[tx_1.properties, '"channel"'::agtype]) = '"cash"'::agtype))
+                                                                                                   Rows Removed by Filter: 1791
+                                                                                                   Buffers: shared hit=56
+                                                                                             ->  Index Only Scan using "Account_pkey" on aml_graph."Account" src_1  (cost=0.15..8.17 rows=1 width=8) (actual time=0.002..0.002 rows=1.00 loops=105)
+                                                                                                   Output: src_1.id
+                                                                                                   Index Cond: (src_1.id = tx_1.start_id)
+                                                                                                   Heap Fetches: 105
+                                                                                                   Index Searches: 105
+                                                                                                   Buffers: shared hit=210
+                                                                                       ->  Index Scan using "Account_pkey" on aml_graph."Account" dst_1  (cost=0.15..8.17 rows=1 width=153) (actual time=0.001..0.001 rows=1.00 loops=105)
+                                                                                             Output: dst_1.id, dst_1.properties
+                                                                                             Index Cond: (dst_1.id = tx_1.end_id)
+                                                                                             Index Searches: 105
+                                                                                             Buffers: shared hit=210
+                                                                                 ->  CTE Scan on params p_1  (cost=0.00..0.02 rows=1 width=32) (actual time=0.000..0.000 rows=1.00 loops=105)
+                                                                                       Output: p_1.reporting_threshold, p_1.min_small_deposits, p_1.min_structured_total, p_1.funnel_window
+                                                                                       Storage: Memory  Maximum Storage: 17kB
+                                             ->  Index Scan using "TRANSFER_start_id_idx" on aml_graph."TRANSFER" tx  (cost=0.28..1.16 rows=1 width=207) (actual time=0.005..0.006 rows=2.00 loops=9)
+                                                   Output: tx.id, tx.start_id, tx.end_id, tx.properties
+                                                   Index Cond: (tx.start_id = src.id)
+                                                   Filter: (agtype_access_operator(VARIADIC ARRAY[tx.properties, '"tx_type"'::agtype]) = '"transfer"'::agtype)
+                                                   Index Searches: 9
+                                                   Buffers: shared hit=30
+                                       ->  CTE Scan on params p  (cost=0.00..0.02 rows=1 width=16) (actual time=0.000..0.000 rows=1.00 loops=9)
+                                             Output: p.reporting_threshold, p.min_small_deposits, p.min_structured_total, p.funnel_window
+                                             Storage: Memory  Maximum Storage: 17kB
+                                 ->  Index Scan using "Account_pkey" on aml_graph."Account" dst  (cost=0.15..3.72 rows=1 width=153) (actual time=0.002..0.002 rows=1.00 loops=9)
+                                       Output: dst.id, dst.properties
+                                       Index Cond: (dst.id = tx.end_id)
+                                       Index Searches: 9
+                                       Buffers: shared hit=18
+                           ->  Index Scan using accounts_pkey on public.accounts beneficiary_account  (cost=0.28..0.41 rows=1 width=31) (actual time=0.002..0.002 rows=1.00 loops=9)
+                                 Output: beneficiary_account.account_id, beneficiary_account.customer_id, beneficiary_account.account_type, beneficiary_account.open_date, beneficiary_account.status, beneficiary_account.home_country
+                                 Index Cond: (beneficiary_account.account_id = (agtype_access_operator(VARIADIC ARRAY[_agtype_build_vertex(src.id, _label_name('17080'::oid, src.id), src.properties), '"account_id"'::agtype]))::text)
+                                 Index Searches: 9
+                                 Buffers: shared hit=27
+                     ->  Index Scan using customers_pkey on public.customers beneficiary_customer  (cost=0.27..0.38 rows=1 width=31) (actual time=0.003..0.003 rows=1.00 loops=9)
+                           Output: beneficiary_customer.customer_id, beneficiary_customer.full_name, beneficiary_customer.customer_type, beneficiary_customer.risk_tier, beneficiary_customer.created_at
+                           Index Cond: (beneficiary_customer.customer_id = beneficiary_account.customer_id)
+                           Index Searches: 9
+                           Buffers: shared hit=27
+               ->  Index Scan using accounts_pkey on public.accounts shell_account  (cost=0.28..0.41 rows=1 width=31) (actual time=0.002..0.002 rows=1.00 loops=9)
+                     Output: shell_account.account_id, shell_account.customer_id, shell_account.account_type, shell_account.open_date, shell_account.status, shell_account.home_country
+                     Index Cond: (shell_account.account_id = (agtype_access_operator(VARIADIC ARRAY[_agtype_build_vertex(dst.id, _label_name('17080'::oid, dst.id), dst.properties), '"account_id"'::agtype]))::text)
+                     Index Searches: 9
+                     Buffers: shared hit=27
+         ->  Index Scan using customers_pkey on public.customers shell_customer  (cost=0.27..0.38 rows=1 width=31) (actual time=0.002..0.002 rows=1.00 loops=9)
+               Output: shell_customer.customer_id, shell_customer.full_name, shell_customer.customer_type, shell_customer.risk_tier, shell_customer.created_at
+               Index Cond: (shell_customer.customer_id = shell_account.customer_id)
+               Index Searches: 9
+               Buffers: shared hit=27
+ Planning:
+   Buffers: shared hit=462
+ Planning Time: 2.739 ms
+ Execution Time: 5.860 ms
+(140 rows)
+

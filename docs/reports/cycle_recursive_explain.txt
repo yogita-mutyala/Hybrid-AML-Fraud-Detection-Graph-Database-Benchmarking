@@ -1,0 +1,40 @@
+                                                                                                                         QUERY PLAN
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=7657.88..7657.88 rows=1 width=208) (actual time=1.207..1.208 rows=9.00 loops=1)
+   Sort Key: p.first_tx_time
+   Sort Method: quicksort  Memory: 26kB
+   Buffers: shared hit=34
+   CTE transfer_edges
+     ->  Seq Scan on transactions  (cost=0.00..64.18 rows=784 width=53) (actual time=0.005..0.183 rows=792.00 loops=1)
+           Filter: ((NULLIF(from_account_id, ''::text) IS NOT NULL) AND (NULLIF(to_account_id, ''::text) IS NOT NULL) AND (tx_type = 'transfer'::text))
+           Rows Removed by Filter: 1104
+           Buffers: shared hit=31
+   CTE paths
+     ->  Recursive Union  (cost=0.00..7192.10 rows=11474 width=180) (actual time=0.009..0.871 rows=828.00 loops=1)
+           Storage: Memory  Maximum Storage: 180kB
+           Buffers: shared hit=31
+           ->  CTE Scan on transfer_edges  (cost=0.00..15.68 rows=784 width=180) (actual time=0.008..0.413 rows=792.00 loops=1)
+                 Storage: Memory  Maximum Storage: 78kB
+                 Buffers: shared hit=31
+           ->  Hash Join  (cost=25.48..706.17 rows=1069 width=180) (actual time=0.052..0.109 rows=12.00 loops=3)
+                 Hash Cond: (p_1.current_account_id = e.from_account_id)
+                 Join Filter: ((e.tx_time >= p_1.last_tx_time) AND (e.tx_time <= (p_1.first_tx_time + '06:00:00'::interval)) AND (e.tx_id <> ALL (p_1.tx_ids)) AND ((e.to_account_id = p_1.origin_account_id) OR (e.to_account_id <> ALL (p_1.node_path))))
+                 Rows Removed by Join Filter: 523
+                 ->  WorkTable Scan on paths p_1  (cost=0.00..176.40 rows=2613 width=180) (actual time=0.000..0.017 rows=273.00 loops=3)
+                       Filter: (depth < 3)
+                       Rows Removed by Filter: 3
+                 ->  Hash  (cost=15.68..15.68 rows=784 width=104) (actual time=0.126..0.126 rows=792.00 loops=1)
+                       Buckets: 1024  Batches: 1  Memory Usage: 76kB
+                       ->  CTE Scan on transfer_edges e  (cost=0.00..15.68 rows=784 width=104) (actual time=0.000..0.051 rows=792.00 loops=1)
+                             Storage: Memory  Maximum Storage: 78kB
+   ->  CTE Scan on paths p  (cost=0.00..401.59 rows=1 width=208) (actual time=1.181..1.198 rows=9.00 loops=1)
+         Filter: ((origin_account_id < node_path[2]) AND (origin_account_id < node_path[3]) AND (depth = 3) AND (current_account_id = origin_account_id) AND (array_length(node_path, 1) = 3))
+         Rows Removed by Filter: 819
+         Storage: Memory  Maximum Storage: 166kB
+         Buffers: shared hit=31
+ Planning:
+   Buffers: shared hit=256
+ Planning Time: 0.340 ms
+ Execution Time: 1.258 ms
+(36 rows)
+

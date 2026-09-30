@@ -1,0 +1,98 @@
+                                                                                                                                 QUERY PLAN                                                                                                                                  
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=69.48..69.49 rows=1 width=143) (actual time=0.675..0.678 rows=9.00 loops=1)
+   Output: (((date_trunc('day'::text, t.tx_time)))::date), t.to_account_id, beneficiary_customer.full_name, (count(*)), (sum(t.amount)), (min(t.tx_time)), (max(t.tx_time)), out_tx.tx_id, out_tx.amount, out_tx.tx_time, out_tx.to_account_id, shell_customer.full_name
+   Sort Key: (sum(t.amount)) DESC, out_tx.tx_time
+   Sort Method: quicksort  Memory: 26kB
+   Buffers: shared hit=175
+   CTE params
+     ->  Result  (cost=0.00..0.01 rows=1 width=84) (actual time=0.005..0.005 rows=1.00 loops=1)
+           Output: 10000.00, 5, 45000.00, '24:00:00'::interval
+   ->  Nested Loop  (cost=60.96..69.46 rows=1 width=143) (actual time=0.446..0.613 rows=9.00 loops=1)
+         Output: ((date_trunc('day'::text, t.tx_time)))::date, t.to_account_id, beneficiary_customer.full_name, (count(*)), (sum(t.amount)), (min(t.tx_time)), (max(t.tx_time)), out_tx.tx_id, out_tx.amount, out_tx.tx_time, out_tx.to_account_id, shell_customer.full_name
+         Inner Unique: true
+         Buffers: shared hit=169
+         ->  Nested Loop  (cost=60.69..69.08 rows=1 width=148) (actual time=0.438..0.592 rows=9.00 loops=1)
+               Output: (date_trunc('day'::text, t.tx_time)), t.to_account_id, (count(*)), (sum(t.amount)), (min(t.tx_time)), (max(t.tx_time)), out_tx.tx_id, out_tx.amount, out_tx.tx_time, out_tx.to_account_id, beneficiary_customer.full_name, shell_account.customer_id
+               Inner Unique: true
+               Buffers: shared hit=142
+               ->  Nested Loop  (cost=60.42..68.74 rows=1 width=132) (actual time=0.431..0.559 rows=9.00 loops=1)
+                     Output: (date_trunc('day'::text, t.tx_time)), t.to_account_id, (count(*)), (sum(t.amount)), (min(t.tx_time)), (max(t.tx_time)), out_tx.tx_id, out_tx.amount, out_tx.tx_time, out_tx.to_account_id, beneficiary_customer.full_name
+                     Inner Unique: true
+                     Buffers: shared hit=115
+                     ->  Nested Loop  (cost=60.14..68.36 rows=1 width=133) (actual time=0.416..0.524 rows=9.00 loops=1)
+                           Output: (date_trunc('day'::text, t.tx_time)), t.to_account_id, (count(*)), (sum(t.amount)), (min(t.tx_time)), (max(t.tx_time)), out_tx.tx_id, out_tx.amount, out_tx.tx_time, out_tx.to_account_id, beneficiary_account.customer_id
+                           Inner Unique: true
+                           Buffers: shared hit=88
+                           ->  Nested Loop  (cost=59.87..68.02 rows=1 width=132) (actual time=0.408..0.494 rows=9.00 loops=1)
+                                 Output: (date_trunc('day'::text, t.tx_time)), t.to_account_id, (count(*)), (sum(t.amount)), (min(t.tx_time)), (max(t.tx_time)), out_tx.tx_id, out_tx.amount, out_tx.tx_time, out_tx.to_account_id, out_tx.from_account_id
+                                 Buffers: shared hit=61
+                                 ->  Nested Loop  (cost=59.59..59.70 rows=1 width=95) (actual time=0.401..0.434 rows=9.00 loops=1)
+                                       Output: (date_trunc('day'::text, t.tx_time)), t.to_account_id, (count(*)), (sum(t.amount)), (min(t.tx_time)), (max(t.tx_time)), p.funnel_window
+                                       Buffers: shared hit=34
+                                       ->  GroupAggregate  (cost=59.59..59.66 rows=1 width=79) (actual time=0.400..0.430 rows=9.00 loops=1)
+                                             Output: t.to_account_id, (date_trunc('day'::text, t.tx_time)), count(*), sum(t.amount), min(t.tx_time), max(t.tx_time)
+                                             Group Key: t.to_account_id, (date_trunc('day'::text, t.tx_time))
+                                             Filter: ((count(*) >= (InitPlan 2).col1) AND (sum(t.amount) >= (InitPlan 3).col1))
+                                             Rows Removed by Filter: 51
+                                             Buffers: shared hit=34
+                                             InitPlan 2
+                                               ->  CTE Scan on params  (cost=0.00..0.02 rows=1 width=4) (actual time=0.001..0.001 rows=1.00 loops=1)
+                                                     Output: params.min_small_deposits
+                                                     Storage: Memory  Maximum Storage: 17kB
+                                             InitPlan 3
+                                               ->  CTE Scan on params params_1  (cost=0.00..0.02 rows=1 width=32) (actual time=0.000..0.000 rows=1.00 loops=1)
+                                                     Output: params_1.min_structured_total
+                                                     Storage: Memory  Maximum Storage: 17kB
+                                             ->  Sort  (cost=59.55..59.56 rows=2 width=37) (actual time=0.369..0.373 rows=105.00 loops=1)
+                                                   Output: t.to_account_id, (date_trunc('day'::text, t.tx_time)), t.amount, t.tx_time
+                                                   Sort Key: t.to_account_id, (date_trunc('day'::text, t.tx_time))
+                                                   Sort Method: quicksort  Memory: 31kB
+                                                   Buffers: shared hit=34
+                                                   ->  Nested Loop  (cost=0.00..59.54 rows=2 width=37) (actual time=0.030..0.278 rows=105.00 loops=1)
+                                                         Output: t.to_account_id, date_trunc('day'::text, t.tx_time), t.amount, t.tx_time
+                                                         Join Filter: (t.amount < p_1.reporting_threshold)
+                                                         Buffers: shared hit=31
+                                                         ->  CTE Scan on params p_1  (cost=0.00..0.02 rows=1 width=32) (actual time=0.007..0.007 rows=1.00 loops=1)
+                                                               Output: p_1.reporting_threshold, p_1.min_small_deposits, p_1.min_structured_total, p_1.funnel_window
+                                                               Storage: Memory  Maximum Storage: 17kB
+                                                         ->  Seq Scan on public.transactions t  (cost=0.00..59.44 rows=6 width=29) (actual time=0.014..0.245 rows=105.00 loops=1)
+                                                               Output: t.tx_id, t.from_account_id, t.to_account_id, t.amount, t.tx_time, t.channel, t.merchant_category, t.tx_type, t.is_fraud_label, t.scenario_tag
+                                                               Filter: ((t.tx_type = 'deposit'::text) AND (t.channel = 'cash'::text))
+                                                               Rows Removed by Filter: 1791
+                                                               Buffers: shared hit=31
+                                       ->  CTE Scan on params p  (cost=0.00..0.02 rows=1 width=16) (actual time=0.000..0.000 rows=1.00 loops=9)
+                                             Output: p.reporting_threshold, p.min_small_deposits, p.min_structured_total, p.funnel_window
+                                             Storage: Memory  Maximum Storage: 17kB
+                                 ->  Index Scan using idx_transactions_from_account_time on public.transactions out_tx  (cost=0.28..8.31 rows=1 width=53) (actual time=0.006..0.006 rows=1.00 loops=9)
+                                       Output: out_tx.tx_id, out_tx.from_account_id, out_tx.to_account_id, out_tx.amount, out_tx.tx_time, out_tx.channel, out_tx.merchant_category, out_tx.tx_type, out_tx.is_fraud_label, out_tx.scenario_tag
+                                       Index Cond: ((out_tx.from_account_id = t.to_account_id) AND (out_tx.tx_time >= (max(t.tx_time))) AND (out_tx.tx_time <= ((max(t.tx_time)) + p.funnel_window)))
+                                       Filter: ((out_tx.tx_type = 'transfer'::text) AND (out_tx.amount >= ((sum(t.amount)) * 0.70)))
+                                       Index Searches: 9
+                                       Buffers: shared hit=27
+                           ->  Index Scan using accounts_pkey on public.accounts beneficiary_account  (cost=0.27..0.34 rows=1 width=31) (actual time=0.003..0.003 rows=1.00 loops=9)
+                                 Output: beneficiary_account.account_id, beneficiary_account.customer_id, beneficiary_account.account_type, beneficiary_account.open_date, beneficiary_account.status, beneficiary_account.home_country
+                                 Index Cond: (beneficiary_account.account_id = out_tx.from_account_id)
+                                 Index Searches: 9
+                                 Buffers: shared hit=27
+                     ->  Index Scan using customers_pkey on public.customers beneficiary_customer  (cost=0.27..0.38 rows=1 width=31) (actual time=0.003..0.003 rows=1.00 loops=9)
+                           Output: beneficiary_customer.customer_id, beneficiary_customer.full_name, beneficiary_customer.customer_type, beneficiary_customer.risk_tier, beneficiary_customer.created_at
+                           Index Cond: (beneficiary_customer.customer_id = beneficiary_account.customer_id)
+                           Index Searches: 9
+                           Buffers: shared hit=27
+               ->  Index Scan using accounts_pkey on public.accounts shell_account  (cost=0.27..0.34 rows=1 width=31) (actual time=0.003..0.003 rows=1.00 loops=9)
+                     Output: shell_account.account_id, shell_account.customer_id, shell_account.account_type, shell_account.open_date, shell_account.status, shell_account.home_country
+                     Index Cond: (shell_account.account_id = out_tx.to_account_id)
+                     Index Searches: 9
+                     Buffers: shared hit=27
+         ->  Index Scan using customers_pkey on public.customers shell_customer  (cost=0.27..0.38 rows=1 width=31) (actual time=0.002..0.002 rows=1.00 loops=9)
+               Output: shell_customer.customer_id, shell_customer.full_name, shell_customer.customer_type, shell_customer.risk_tier, shell_customer.created_at
+               Index Cond: (shell_customer.customer_id = shell_account.customer_id)
+               Index Searches: 9
+               Buffers: shared hit=27
+ Planning:
+   Buffers: shared hit=329
+ Planning Time: 4.163 ms
+ Execution Time: 0.994 ms
+(94 rows)
+
